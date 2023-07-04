@@ -1,11 +1,14 @@
+#!/opt/conda/envs/python3715/bin/python
+# -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 import scrapy
 import aria2p
 
 # initialization, these are the default values
 aria2 = aria2p.API(
     aria2p.Client(
-        # host="http://192.168.165.68",
-        host="http://localhost",
+        host="http://192.168.165.68",
+        # host="http://localhost",
         port=6800,
         secret="P3TERX"
     )
@@ -21,13 +24,25 @@ def filter_links(link):
 
 class MySpider(scrapy.Spider):
     name = 'myspider_nsst'
+    current_time = datetime.utcnow()
+    # 计算前一天的日期
+    one_ago = current_time - timedelta(days=1)
+
+    # 获取当前UTC日期，格式为：20230703
+    date = one_ago.strftime('%Y%m%d')
+
+    nsst_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/nsst.{date}/'
+
+    # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
+    start_urls = [nsst_url]
+
     start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/']
 
     # list downloads
-    downloads = aria2.get_downloads()
-
-    for download in downloads:
-        print(download.name, download.download_speed)
+    # downloads = aria2.get_downloads()
+    #
+    # for download in downloads:
+    #     print(download.name, download.download_speed)
 
     def start_requests(self):
         for url in self.start_urls:

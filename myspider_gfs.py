@@ -1,4 +1,5 @@
-
+#!/opt/conda/envs/python3715/bin/python
+# -*- coding: utf-8 -*-
 import time
 from datetime import datetime, timedelta
 import scrapy
@@ -77,8 +78,8 @@ class MySpider(scrapy.Spider):
                 directory = response.url.replace('https://', '/downloads/')
                 print('文件保存目录: ', directory)
 
-                # options = {"dir": directory}
-                # aria2.add(url, options=options)
+                options = {"dir": directory}
+                aria2.add(url, options=options)
 
                 time.sleep(0.1)
                 self.count = self.count + 1
