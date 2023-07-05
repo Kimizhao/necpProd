@@ -71,9 +71,9 @@ class MySpider(scrapy.Spider):
                 if link.endswith('grib2') is False:
                     continue
 
-                # 每100个文件休眠60s
+                # 每100个文件休眠300秒
                 if self.count % 100 == 0:
-                    time.sleep(100)
+                    time.sleep(300)
 
                 directory = response.url.replace('https://', '/downloads/')
                 print('文件保存目录: ', directory)
@@ -81,7 +81,8 @@ class MySpider(scrapy.Spider):
                 options = {"dir": directory}
                 aria2.add(url, options=options)
 
-                time.sleep(0.1)
+                # 休眠1秒
+                time.sleep(1)
                 self.count = self.count + 1
 
             else:
