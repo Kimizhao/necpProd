@@ -24,29 +24,40 @@ def filter_links(link):
 
 class MySpider(scrapy.Spider):
     name = 'myspider_gfs'
-    current_time = datetime.utcnow()
-    # 计算前2小时的时间
-    two_hours_ago = current_time - timedelta(hours=2)
 
-    # 获取当前UTC日期，格式为：20230703
-    date = two_hours_ago.strftime('%Y%m%d')
-    # 当前时间所处的时段，间隔为6小时
-    hour = int(two_hours_ago.strftime('%H'))
-    if 0 <= hour < 6:
-        aa = '00'
-    elif 6 <= hour < 12:
-        aa = '06'
-    elif 12 <= hour < 18:
-        aa = '12'
-    elif 18 <= hour < 24:
-        aa = '18'
+    def __init__(self, *args, **kwargs):
+        super(MySpider, self).__init__(*args, **kwargs)
+        self.date_hour = kwargs.get('date_hour')
+        # 判断date_hour属性，如果该属性不为空则使用date_hour参数，否则使用当前时间
+        # 例如：scrapy crawl myspider_gfs -a date_hour=2023070300
+        if self.date_hour is not None:
+            # 获取当前UTC时间
+            current_time = datetime.strptime(self.date_hour, '%Y%m%d%H')
+        else:
+            current_time = datetime.utcnow()
 
-    gfs_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{aa}/'
+        # 计算前2小时的时间
+        two_hours_ago = current_time - timedelta(hours=2)
 
-    # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
-    start_urls = [gfs_url]
+        # 获取当前UTC日期，格式为：20230703
+        date = two_hours_ago.strftime('%Y%m%d')
+        # 当前时间所处的时段，间隔为6小时
+        hour = int(two_hours_ago.strftime('%H'))
+        if 0 <= hour < 6:
+            aa = '00'
+        elif 6 <= hour < 12:
+            aa = '06'
+        elif 12 <= hour < 18:
+            aa = '12'
+        elif 18 <= hour < 24:
+            aa = '18'
 
-    count = 1
+        gfs_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{aa}/'
+
+        # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
+        self.start_urls = [gfs_url]
+
+        self.count = 1
 
     def start_requests(self):
         for url in self.start_urls:

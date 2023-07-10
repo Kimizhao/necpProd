@@ -23,3 +23,8 @@ crontab -e
 0 6,12,18,0 * * * cd /opt/ecdata/necpProd;/opt/conda/envs/python3715/bin/scrapy runspider myspider_gfs.py >> /var/log/myspider_gfs.log 2>&1
 0 7 * * * cd /opt/ecdata/necpProd;/opt/conda/envs/python3715/bin/scrapy runspider myspider_nsst.py >> /var/log/myspider_nsst.log 2>&1
 ```
+
+## 说明
+新增参数
+```shell
+scrapy runspider myspider_gfs.py -a date_hour=2023070300
