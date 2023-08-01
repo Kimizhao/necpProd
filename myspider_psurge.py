@@ -1,11 +1,14 @@
+#!/opt/conda/envs/python3715/bin/python
+# -*- coding: utf-8 -*-
 import scrapy
 import aria2p
+from datetime import datetime, timedelta
 
 # initialization, these are the default values
 aria2 = aria2p.API(
     aria2p.Client(
-        # host="http://192.168.165.68",
-        host="http://localhost",
+        host="http://192.168.165.68",
+        # host="http://localhost",
         port=6800,
         secret="P3TERX"
     )
@@ -21,13 +24,28 @@ def filter_links(link):
 
 class MySpider(scrapy.Spider):
     name = 'myspider_psurge'
-    start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/psurge/prod/psurge.20230629/']
 
-    # list downloads
-    downloads = aria2.get_downloads()
+    def __init__(self, *args, **kwargs):
+        super(MySpider, self).__init__(*args, **kwargs)
+        self.date_hour = kwargs.get('date_hour')
+        # 判断date_hour属性，如果该属性不为空则使用date_hour参数，否则使用当前时间
+        # 例如：scrapy crawl myspider_psurge -a date_hour=2023070300
+        if self.date_hour is not None:
+            # 获取当前UTC时间
+            current_time = datetime.strptime(self.date_hour, '%Y%m%d')
 
-    for download in downloads:
-        print(download.name, download.download_speed)
+            one_ago = current_time
+        else:
+            current_time = datetime.utcnow()
+            # 计算前一天的日期
+            one_ago = current_time - timedelta(days=1)
+
+        # 获取当前UTC日期，格式为：20230703
+        date = one_ago.strftime('%Y%m%d')
+
+        psurge_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/psurge/prod/psurge.{date}/'
+
+        self.start_urls = [psurge_url]
 
     def start_requests(self):
         for url in self.start_urls:

@@ -24,25 +24,30 @@ def filter_links(link):
 
 class MySpider(scrapy.Spider):
     name = 'myspider_nsst'
-    current_time = datetime.utcnow()
-    # 计算前一天的日期
-    one_ago = current_time - timedelta(days=1)
 
-    # 获取当前UTC日期，格式为：20230703
-    date = one_ago.strftime('%Y%m%d')
+    def __init__(self, *args, **kwargs):
+        super(MySpider, self).__init__(*args, **kwargs)
+        self.date_hour = kwargs.get('date_hour')
+        # 判断date_hour属性，如果该属性不为空则使用date_hour参数，否则使用当前时间
+        # 例如：scrapy crawl myspider_nsst -a date_hour=2023070300
+        if self.date_hour is not None:
+            # 获取当前UTC时间
+            current_time = datetime.strptime(self.date_hour, '%Y%m%d')
 
-    nsst_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/nsst.{date}/'
+            one_ago = current_time
+        else:
+            current_time = datetime.utcnow()
+            # 计算前一天的日期
+            one_ago = current_time - timedelta(days=1)
 
-    # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
-    start_urls = [nsst_url]
+        # 获取当前UTC日期，格式为：20230703
+        date = one_ago.strftime('%Y%m%d')
 
-    start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/']
+        nsst_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/nsst/prod/nsst.{date}/'
 
-    # list downloads
-    # downloads = aria2.get_downloads()
-    #
-    # for download in downloads:
-    #     print(download.name, download.download_speed)
+        # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
+        self.start_urls = [nsst_url]
+
 
     def start_requests(self):
         for url in self.start_urls:

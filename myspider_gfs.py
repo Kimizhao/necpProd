@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 import scrapy
 import aria2p
+import re
 
 # initialization, these are the default values
 aria2 = aria2p.API(
@@ -33,16 +34,17 @@ class MySpider(scrapy.Spider):
         if self.date_hour is not None:
             # 获取当前UTC时间
             current_time = datetime.strptime(self.date_hour, '%Y%m%d%H')
+            # 计算前2小时的时间
+            download_hour = current_time
         else:
             current_time = datetime.utcnow()
-
-        # 计算前2小时的时间
-        two_hours_ago = current_time - timedelta(hours=2)
+            # 计算前2小时的时间
+            download_hour = current_time - timedelta(hours=2)
 
         # 获取当前UTC日期，格式为：20230703
-        date = two_hours_ago.strftime('%Y%m%d')
+        date = download_hour.strftime('%Y%m%d')
         # 当前时间所处的时段，间隔为6小时
-        hour = int(two_hours_ago.strftime('%H'))
+        hour = int(download_hour.strftime('%H'))
         if 0 <= hour < 6:
             aa = '00'
         elif 6 <= hour < 12:
@@ -58,6 +60,9 @@ class MySpider(scrapy.Spider):
         self.start_urls = [gfs_url]
 
         self.count = 1
+
+        # 过滤gfswave、global和grib2结尾的文件
+        self.pattern = r"gfswave\.t\d{2}z\.global\.\w+\.\w+\.grib2$"
 
     def start_requests(self):
         for url in self.start_urls:
@@ -78,8 +83,8 @@ class MySpider(scrapy.Spider):
                 url = response.urljoin(link)
                 print('文件下载链接: ', url)
 
-                # 判断是否是grib2结尾的文件
-                if link.endswith('grib2') is False:
+                # 判断是否是gfswave、global和grib2结尾的文件
+                if re.search(self.pattern, link) is None:
                     continue
 
                 # 每100个文件休眠300秒
