@@ -6,7 +6,7 @@ from logging.handlers import TimedRotatingFileHandler
 import time
 from datetime import datetime, timedelta
 import aria2p
-# import re
+import re
 
 downloads_path = "/downloads"
 
@@ -81,7 +81,7 @@ def download_gfs(date_hour):
         for f in range(0, 120 + 1, 1):
             forecast_list.append(f)
 
-        for f in range(123, 384 + 1, 1):
+        for f in range(120, 384 + 1, 3):
             forecast_list.append(f)
 
         # 遍历forecast_list，生成url
