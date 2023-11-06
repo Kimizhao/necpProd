@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="9a41fb95-5272-4005-a0db-82edc381239e" name="geoai068-necpProd">
-        <fileTransfer rootFolder="/opt/ecdata/necpProd" accessType="SFTP" host="192.168.165.68" port="22" sshConfigId="e194a9f0-5c4f-4143-9741-d44ec540f62b" sshConfig="root@192.168.165.68">
+      <webServer id="9a41fb95-5272-4005-a0db-82edc381239e" name="geoai078-necpProd">
+        <fileTransfer rootFolder="/app/ecdata/necpProd" accessType="SFTP" host="192.168.165.78" port="22" sshConfigId="299264aa-e6df-4b9e-bac4-0726541dc692" sshConfig="root@192.168.165.78">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

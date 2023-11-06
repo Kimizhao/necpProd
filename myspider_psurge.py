@@ -7,9 +7,9 @@ from datetime import datetime, timedelta
 # initialization, these are the default values
 aria2 = aria2p.API(
     aria2p.Client(
-        host="http://192.168.165.68",
+        host="http://192.168.165.78",
         # host="http://localhost",
-        port=6800,
+        port=6801,
         secret="P3TERX"
     )
 )
@@ -66,7 +66,7 @@ class MySpider(scrapy.Spider):
                 url = response.urljoin(link)
                 print('文件下载链接: ', url)
 
-                directory = response.url.replace('https://', '/downloads/')
+                directory = response.url.replace('https://', '/downloads/GFS/')
                 print('文件保存目录: ', directory)
 
                 options = {"dir": directory}

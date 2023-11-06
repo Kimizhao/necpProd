@@ -1,4 +1,4 @@
-# import requests
+import requests
 import json
 import sys
 import logging
@@ -8,15 +8,16 @@ from datetime import datetime, timedelta
 import aria2p
 import re
 
-downloads_path = "/downloads"
+downloads_path = "/downloads/GFS"
 
 # initialization, these are the default values
 aria2 = aria2p.API(
     aria2p.Client(
-        host="http://192.168.165.68",
+        host="http://192.168.165.78",
         # host="http://localhost",
-        port=6800,
-        secret="P3TERX"
+        port=6801,
+        secret="P3TERX",
+        timeout=300
     )
 )
 
@@ -60,6 +61,8 @@ def download_gfs(date_hour):
             # 计算前2小时的时间
             download_hour = current_time - timedelta(hours=1)
 
+        logging.info(f"download_hour: {download_hour}")
+
         # 获取当前UTC日期，格式为：20230703
         date = download_hour.strftime('%Y%m%d')
         # 当前时间所处的时段，间隔为6小时
@@ -78,7 +81,7 @@ def download_gfs(date_hour):
         # 批量生成url，根据date、cycle、f
         # FFF is the forecast hour of product from 000 - 120 step 1, 123 - 384 step 3，放在一个列表中
         forecast_list = []
-        for f in range(0, 120 + 1, 1):
+        for f in range(0, 120, 1):
             forecast_list.append(f)
 
         for f in range(120, 384 + 1, 3):
@@ -90,7 +93,7 @@ def download_gfs(date_hour):
             # directory = f"https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{cycle}/atmos"
             directory = f"https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?dir=%2Fgfs.{date}%2F{cycle}%2Fatmos&file=gfs.t{cycle}z.pgrb2.0p25.f{f:03d}"
             # 拼接文件名
-            # filename = f"gfs.t{cycle}z.pgrb2.0p25.f{f:03d}.grib2"
+            filename = f"gfs.{date}.t{cycle}z.pgrb2.0p25.f{f:03d}.grib2"
 
             # 拼接url
             url = f"{directory}&{parameters}&{levels}"
@@ -100,27 +103,27 @@ def download_gfs(date_hour):
             # options = {"dir": out_directory, "out": filename}
             # 覆盖已存在的文件
             # options = {"dir": out_directory, "out": filename, "allow-overwrite": "true"}
-            options = {"dir": out_directory, "allow-overwrite": "true"}
+            options = {"dir": out_directory, "out": filename, "allow-overwrite": "true"}
             dirs = aria2.add(url, options=options)
-            logging.info(f"File downloaded successfully: {dirs}")
+            logging.info(f'文件保存目录: {out_directory}/{filename}')
 
             # 每100个文件休眠300秒
-            if count % 100 == 0:
-                time.sleep(300)
+            # if count % 100 == 0:
+            #     time.sleep(300)
 
             # 休眠1秒
-            time.sleep(1)
+            time.sleep(4)
             count += 1
 
-        # filename = "gfs_data.grib2"
-        # response = requests.get(url)
-        #
-        # if response.status_code == 200:
-        #     with open(out_directory, 'wb') as file:
-        #         file.write(response.content)
-        #         print(f"File downloaded successfully: {out_directory}")
-        # else:
-        #     print("Failed to download the file")
+            # filename = "gfs_data.grib2"
+            # response = requests.get(url)
+            #
+            # if response.status_code == 200:
+            #     with open(out_directory, 'wb') as file:
+            #         file.write(response.content)
+            #         print(f"File downloaded successfully: {out_directory}")
+            # else:
+            #     print("Failed to download the file")
 
     except Exception as e:
         logging.error(e)

@@ -28,3 +28,7 @@ crontab -e
 新增参数
 ```shell
 scrapy runspider myspider_gfs.py -a date_hour=2023070300
+
+
+## 下载器地址
+http://192.168.165.78:6880/

@@ -1,5 +1,6 @@
 #!/opt/conda/envs/python3715/bin/python
 # -*- coding: utf-8 -*-
+import logging
 import time
 from datetime import datetime, timedelta
 import scrapy
@@ -9,10 +10,11 @@ import re
 # initialization, these are the default values
 aria2 = aria2p.API(
     aria2p.Client(
-        host="http://192.168.165.68",
+        host="http://192.168.165.78",
         # host="http://localhost",
-        port=6800,
-        secret="P3TERX"
+        port=6801,
+        secret="P3TERX",
+        timeout=300
     )
 )
 
@@ -39,10 +41,11 @@ class MySpider(scrapy.Spider):
         else:
             current_time = datetime.utcnow()
             # 计算前2小时的时间
-            download_hour = current_time - timedelta(hours=2)
+            download_hour = current_time - timedelta(hours=0.5)
 
+        logging.info(f"download_hour: {download_hour}")
         # 获取当前UTC日期，格式为：20230703
-        date = download_hour.strftime('%Y%m%d')
+        self.date = download_hour.strftime('%Y%m%d')
         # 当前时间所处的时段，间隔为6小时
         hour = int(download_hour.strftime('%H'))
         if 0 <= hour < 6:
@@ -54,7 +57,7 @@ class MySpider(scrapy.Spider):
         elif 18 <= hour < 24:
             aa = '18'
 
-        gfs_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{date}/{aa}/'
+        gfs_url = f'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{self.date}/{aa}/'
 
         # start_urls = ['https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.20230703/00/']
         self.start_urls = [gfs_url]
@@ -81,29 +84,33 @@ class MySpider(scrapy.Spider):
                 # print('文件名: ', link)
                 # print('文件链接: ', response.url)
                 url = response.urljoin(link)
-                print('文件下载链接: ', url)
+                logging.info(f'文件下载链接: {url}')
 
                 # 判断是否是gfswave、global和grib2结尾的文件
                 if re.search(self.pattern, link) is None:
                     continue
 
                 # 每100个文件休眠300秒
-                if self.count % 100 == 0:
-                    time.sleep(300)
+                # if self.count % 100 == 0:
+                #     time.sleep(300)
 
-                directory = response.url.replace('https://', '/downloads/')
-                print('文件保存目录: ', directory)
+                directory = response.url.replace('https://', '/downloads/GFS/')
 
-                options = {"dir": directory}
+                # 在文件名gfswave.t18z.global.0p16.f333.grib2，变换成gfswave.{date}.t18z.global.0p16.f333.grib2
+                filename = link.replace('gfswave.', f'gfswave.{self.date}.')
+
+                options = {"dir": directory, "out": filename, "allow-overwrite": "true"}
                 aria2.add(url, options=options)
 
+                logging.info(f'文件保存目录: {directory}/{filename}')
+
                 # 休眠1秒
-                time.sleep(1)
-                self.count = self.count + 1
+                time.sleep(4)
+                # self.count = self.count + 1
 
             else:
                 if link.startswith('enkfgdas.') is False and link.startswith('gdas.') is False and link.startswith('bufr.') is False and link.startswith('station/') is False and link.startswith('atmos/') is False:
-                    print('目录链接: ', link)
+                    logging.info(f'目录链接: {link}')
                     yield scrapy.Request(url=response.urljoin(link), callback=self.parse)
 
         # 处理子链接

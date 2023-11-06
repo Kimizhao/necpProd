@@ -1,2 +1,3 @@
 0 6,12,18,0 * * * cd /opt/necpProd;scrapy runspider myspider_gfs.py >> /var/log/myspider_gfs.log 2>&1
+0 6,12,18,0 * * * cd /opt/necpProd;python gfs_data.py >> /var/log/gfs_data.log 2>&1
 0 7 * * * cd /opt/necpProd;scrapy runspider myspider_nsst.py >> /var/log/myspider_nsst.log 2>&1
